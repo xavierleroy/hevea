@@ -51,6 +51,7 @@ and path = ref []
 and outname = ref ""
 and small_length = ref default_small_length
 
+let fancy_tilde = ref false
 
 let check_displayverb n =
   if n > 1 then
@@ -109,6 +110,10 @@ let () =
      " add borders to some block-level elements";
      "-rsz", Arg.Set_int small_length,
      (Printf.sprintf "SIZE set SIZE (default: %i) of leaves in rope implementation" default_small_length);
+     "-fancy-tilde", Arg.Set fancy_tilde,
+     " render '~' using Unicode spacing characters";
+     "-plain-tilde", Arg.Clear fancy_tilde,
+     " render '~' as a plain non-breaking space";
      "-v", Arg.Unit (fun () -> incr Misc.readverb; check_displayverb !Misc.readverb),
      " verbose flag; repeat to increase verbosity";
      "-version",

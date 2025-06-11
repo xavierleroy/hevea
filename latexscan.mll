@@ -1661,8 +1661,10 @@ def_code "\\@hevea@tilde"
   (fun _lexbuf ->
     if effective !alltt || not (is_plain '~') then
       Dest.put_char '~'
+    else if !fancy_tilde then
+      Dest.put_hspace true (Length.Char 1)
     else
-      Dest.put_hspace true (Length.Char 1))
+      Dest.put_nbsp ())
 ;;
 
 def_code "\\@hevea@question"

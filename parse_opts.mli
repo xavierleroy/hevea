@@ -27,6 +27,8 @@ val except : string list ref
 val path : string list ref
 val small_length : int ref
 
+val fancy_tilde : bool ref
+
 val filter : bool
 val styles : input list
 val base_in : string

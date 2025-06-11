@@ -178,6 +178,12 @@ let unskip () =
 
 let put_tag tag = put tag
 
+let put_nbsp () =
+  if !Lexstate.whitepre || (flags.in_math && !Parse_opts.mathml) then begin
+    put_char ' '
+  end else
+    put_unicode OutUnicode.nbsp
+
 module HorizontalSpace =
   struct
     (* Width of a character ("gauge") given in multiples of an [em]
