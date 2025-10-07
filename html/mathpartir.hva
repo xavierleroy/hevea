@@ -1,22 +1,22 @@
-%  Mathpartir --- Math Paragraph for Typesetting Inference Rules
+[%  Mathpartir --- Math Paragraph for Typesetting Inference Rules
 %
 %  Copyright (C) 2001--2005 Didier Rémy
 %  Hevea version by Luc Maranget
 %
-%  Author         : Didier Remy 
+%  Author         : Didier Remy
 %  Version        : 1.2
 %  Bug Reports    : to author
 %  Web Site       : http://pauillac.inria.fr/~remy/latex/
-% 
+%
 %  WhizzyTeX is free software; you can redistribute it and/or modify
 %  it under the terms of the GNU General Public License as published by
 %  the Free Software Foundation; either version 2, or (at your option)
 %  any later version.
-%  
+%
 %  Mathpartir is distributed in the hope that it will be useful,
 %  but WITHOUT ANY WARRANTY; without even the implied warranty of
 %  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-%  GNU General Public License for more details 
+%  GNU General Public License for more details
 %  (http://pauillac.inria.fr/~remy/license/GPL).
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,7 +27,7 @@
 % See the interface of mathpartir.sty
 % However, by default \\ does a vertical break in mathpar and a horizontal cut
 % in mathrule
-% 
+%
 % Preceeding \\ by \hva \\ does a horizontal break in mathpar and a vertical
 % break in mathrule.
 %
@@ -68,7 +68,10 @@
 %%exported mathpar
 \newenvironment{mathpar}[1][]
   {\@open{div}{\envclass@attr{mathpar}}
-  \let\and\mathpar@hspace\let\par\mathpar@vspace\let\\\mathpar@vspace\let\hva\mathpar@hva%
+  \let\and\mathpar@hspace%
+  \let\par\mathpar@vspace%
+  \let\\\mathpar@vspace%
+  \let\hva\mathpar@hva%
   \open@mathpar@table\open@mprow\open@mpfstcell}
   {\close@mplstcell\close@mprow\@close{table}\@close{div}}
 %%%% Type Inference Rules (TIR)
@@ -81,9 +84,11 @@
 \endmpr@line\mpr@line{\usebox{\mpr@save@arg}}}
 %%% this may not be robust (if nextchar is special char)
 %%% also may not want this semantics
-\def \@latexcr #1{%
-\def \@test {#1}\ifx \@test \@latexcr@char \latexcr \else
-\qquad #1\fi}
+\def \@latexcr #1{\def \@testa {#1}%
+\def \@testb{\\}\ifx \@testa \@testb \let \@do \mpr@break@display \else%
+\def \@testb{\hva}\ifx \@testa \@testb \let \@do \mpr@break@display \else
+\def \@do {\qquad \@testa} \fi\fi \@do}
+\def \mpr@infer@hva#1{}%
 \newcommand{\mpr@valign}[1]
 {\ifthenelse{\equal{#1}{}}{}{style="vertical-align:#1"}}
 \newcommand{\mpr@line}[1]
@@ -92,8 +97,9 @@
 \@open{td}{style="whitespace:nowrap;text-align:\ifmpr@center{}center\else{}left\fi"}%
 \bgroup\def\mpr@line@arg{#1}%
 \@open{display}{\mpr@valign{#1}}%
-\def\\{\@latexcr{\qquad}}\def\and{\@latexcr{\qquad}}%
-\let\hva\mpr@line@hva}
+\def\\{\@latexcr}\def\and{\@latexcr{\qquad}}%
+\let \hva \mpr@infer@hva
+}
 \newcommand{\endmpr@line}
 {\@close{display}\egroup\@force{td}%
 \ifx\mpr@label\mpr@R\@open{td}{}~\mpr@name{\@rule@name}\@force{td}\fi
@@ -145,7 +151,6 @@
 \@open{td}{style="background-color:\mpr@hhline@color;height:3px"}\@force{td}%
 \mpr@emptyR
 \@force{tr}}
-
 \newcommand {\inferrule*}[3][]{%
    \bgroup\let\@tir@name\RefTirName%
    \mpr@vdotsfalse\let\mpr@label\mpr@N\let\mpr@name\@mpr@name%Default
@@ -156,6 +161,9 @@
    \def\mpr@arg{#1}\ifx\mpr@arg\mpr@empty
    \inferrule*{#2}{#3}\else
    \inferrule*[before={\let\@tir@name\TirName},lab=#1,center]{#2}{#3}\fi}
+
+\newcommand {\triplerule}[4][]{%
+   \inferrule[#1]{#2}{\inferrule{#3}{#4}}}
 
 \def \mprset {\setkeys{mprset}}
 \define@key {mprset}{flushleft}[]{\mpr@centerfalse}
