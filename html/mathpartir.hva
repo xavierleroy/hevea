@@ -35,45 +35,71 @@
 
 \usepackage {keyval}
 \let\latexcr\\
-%%% Styles for mathpar
-\newcommand{\mp@row@style}
-  {border-collapse:separate;border-spacing:2ex;width:100\%;margin:0ex;}
-\newstyle{.mprow}{\mp@row@style}
-\newstyle{.vmprow}{\mp@row@style empty-cells:show; border:solid \@magenta{} 2px}
-\newcommand{\mp@cell@style}{padding:0px;width:auto;}
-\newstyle{.mprcell}{\mp@cell@style}
-\newstyle{.vmprcell}{\mp@cell@style border:dotted \@magenta{} 2px;}
+
+\newstyle{.mpcell}{
+  display: inline-block;
+  width: auto;
+  vertical-align: middle;
+  margin: 10px;
+  border-radius: 10px;
+}
+
+\newstyle {.mprow}{
+  display: flex;
+  flex-direction: row;
+  flex-vasis: auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+ }
+
+\newcommand{\mpr@andskip}{2em}
+\newstyle {.mpskip}{
+  width: \mpr@andskip;
+  }
+
 \setenvclass{mathpar}{mathpar}
-\ifverbd
-\setenvclass{mprow}{vmprow}
-\setenvclass{mprcell}{vmprcell}
-\else
 \setenvclass{mprow}{mprow}
-\setenvclass{mprcell}{mprcell}
-\fi
+\setenvclass{mpcell}{mpcell}
+\setenvclass{mpskip}{mpskip}
+
 %% Open/close table elements
-\def\open@mathpar@table{\@open{table}{\envclass@attr{mprow}}}
-\def\open@mprow{\@open{tr}{style="vertical-align:middle"}}
-\def\close@mprow{\@close{tr}}
-\def\open@mpcell{\@open{td}{\@addstyle{text-align:center}{\envclass@attr[ ]{mprcell}}}\displaymath}
-\def\close@mpcell{\enddisplaymath\@close{td}}
-\def\force@mpcell{\enddisplaymath\@force{td}}
-\def\open@mpfstcell{\open@mpcell}
-\def\close@mplstcell{\force@mpcell}
-\def\mathpar@hspace{\push@styles\close@mpcell\open@mpcell\pop@styles\@skip@blanks}
+\def\open@mathpar{\@open{div}{\envclass@attr{mathpar}}}
+\def\close@mathpar{\@close{div}}
+
+\def\open@mprow{\@open{div}{\envclass@attr{mprow}}}
+\def\close@mprow{\@close{div}}
+
+\def\open@mpcell{\@open{div}{\envclass@attr{mpcell}}\displaymath}
+\def\close@mpcell{\enddisplaymath\@close{div}}
+%% \def\force@mpcell{\enddisplaymath\@force{div}}
+
+\providecommand{\hva@cellskip}{2em}
+\def\mathpar@andskip
+  {\@open{div}{style="width:\hva@cellskip"}\@print{&nbsp;}\@close{div}}
+  %% {\@open{div}{\envclass@attr{mpskip}}\@print{&nbsp;}\@close{div}}
+\def\mathpar@hspace
+  {\push@styles\close@mpcell \mathpar@andskip \open@mpcell\pop@styles}
+
 \def\mathpar@vspace
-{\push@styles\close@mplstcell\close@mprow\@close{table}%
-\open@mathpar@table\open@mprow\open@mpfstcell\pop@styles\@skip@blanks}%
+{\push@styles\close@mpcell\close@mprow \open@mprow\open@mpcell\pop@styles}
+
 \def\mathpar@hva#1{\ifx#1\and\mathpar@vspace\else\mathpar@hspace\fi}%
+
 %%exported mathpar
 \newenvironment{mathpar}[1][]
-  {\@open{div}{\envclass@attr{mathpar}}
+  {\open@mathpar%
   \let\and\mathpar@hspace%
-  \let\par\mathpar@vspace%
+  \let\par\mathpar@hspace%
   \let\\\mathpar@vspace%
   \let\hva\mathpar@hva%
-  \open@mathpar@table\open@mprow\open@mpfstcell}
-  {\close@mplstcell\close@mprow\@close{table}\@close{div}}
+  \open@mprow
+  \open@mpcell}
+  {\close@mpcell
+   \close@mprow
+   \close@mathpar}
+
 %%%% Type Inference Rules (TIR)
 \newsavebox{\mpr@save@arg}%
 \newcommand{\mpr@globle}[1]{}
@@ -81,7 +107,7 @@
 \def \mpr@line@hva #1{\mpr@break@display}
 \def \mpr@break@display
 {\sbox{\mpr@save@arg}{\mpr@line@arg}%
-\endmpr@line\mpr@line{\usebox{\mpr@save@arg}}}
+\endmpr@line@nolab\mpr@line{\usebox{\mpr@save@arg}}}
 %%% this may not be robust (if nextchar is special char)
 %%% also may not want this semantics
 \def \@latexcr #1{\def \@testa {#1}%
@@ -100,9 +126,10 @@
 \def\\{\@latexcr}\def\and{\@latexcr{\qquad}}%
 \let \hva \mpr@infer@hva
 }
+\newcommand{\endmpr@line@nolab}{\@close{display}\egroup\@force{td}\@close{tr}}
 \newcommand{\endmpr@line}
 {\@close{display}\egroup\@force{td}%
-\ifx\mpr@label\mpr@R\@open{td}{}~\mpr@name{\@rule@name}\@force{td}\fi
+\ifx\mpr@label\mpr@R\@open{td}{style="valign:bottom"}~\mpr@name{\@rule@name}\@force{td}\fi
 \@close{tr}}
 \def \mpr@empty {}
 \newif \ifmpr@center \mpr@centertrue
